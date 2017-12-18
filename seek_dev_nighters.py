@@ -24,7 +24,10 @@ def load_attempts():
 
 def get_post_code_time(users):
     user_time_zone = pytz.timezone(users['timezone'])
-    local_time = datetime.datetime.fromtimestamp(users['timestamp'], user_time_zone)
+    local_time = datetime.datetime.fromtimestamp(
+        users['timestamp'],
+        user_time_zone
+    )
     return local_time
 
 
