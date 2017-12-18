@@ -4,33 +4,38 @@ import datetime
 
 
 def load_attempts():
-    pages = 1
+    response = requests.get(
+        'http://devman.org/api/challenges/solution_attempts'
+    ).json()
+    pages = response['number_of_pages']
     for page in range(1, pages+1):
-        response = requests.get('http://devman.org/api/challenges/'
-                                'solution_attempts', params={'page': page})
-        json_data = response.json()
-        number_of_pages = json_data['number_of_pages']
-        for record in json_data['records']:
+        response = requests.get(
+            'http://devman.org/api/challenges/'
+            'solution_attempts', params={'page': page}
+        )
+        response_dict = response.json()
+        for record in response_dict['records']:
             yield {
-                   'username': record['username'],
-                   'timestamp': record['timestamp'],
-                   'timezone': record['timezone'],
-                  }
-        if page == number_of_pages:
-            break
+                'username': record['username'],
+                'timestamp': record['timestamp'],
+                'timezone': record['timezone'],
+            }
 
 
-def get_midnighters(users):
+def get_post_code_time(users):
     user_time_zone = pytz.timezone(users['timezone'])
-    timestamp = datetime.datetime.fromtimestamp(int(users['timestamp']))
-    user_time_local = user_time_zone.localize(timestamp)
-    return user_time_local
+    local_time = datetime.datetime.fromtimestamp(users['timestamp'], user_time_zone)
+    return local_time
 
 
 if __name__ == '__main__':
     for attempt in load_attempts():
-        user_time = get_midnighters(attempt)
+        user_time = \
+            get_post_code_time(attempt)
         if 0 <= int(user_time.strftime('%H')) < 6:
-            print('User {} post your code at {}'.format(attempt['username'],
-                                                        user_time.strftime
-                                                        ('%H:%M:%S')))
+            print(
+                'User {} post your code at {}'.format(
+                    attempt['username'],
+                    user_time.strftime('%H:%M:%S')
+                )
+            )
