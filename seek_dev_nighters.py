@@ -22,10 +22,10 @@ def load_attempts():
             }
 
 
-def get_post_code_time(users):
-    user_time_zone = pytz.timezone(users['timezone'])
+def get_user_local_time(user):
+    user_time_zone = pytz.timezone(user['timezone'])
     local_time = datetime.datetime.fromtimestamp(
-        users['timestamp'],
+        user['timestamp'],
         user_time_zone
     )
     return local_time
@@ -33,8 +33,7 @@ def get_post_code_time(users):
 
 if __name__ == '__main__':
     for attempt in load_attempts():
-        user_time = \
-            get_post_code_time(attempt)
+        user_time = get_user_local_time(attempt)
         if 0 <= int(user_time.strftime('%H')) < 6:
             print(
                 'User {} post your code at {}'.format(
