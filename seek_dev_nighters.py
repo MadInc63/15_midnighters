@@ -17,21 +17,20 @@ def load_attempts():
                    'timezone': record['timezone'],
                   }
         if page == number_of_pages:
-            print('This URL has only {} pages and '
-                  'all of them are received'.format(page))
             break
 
 
 def get_midnighters(users):
     user_time_zone = pytz.timezone(users['timezone'])
     timestamp = datetime.datetime.fromtimestamp(int(users['timestamp']))
-    user_time = user_time_zone.localize(timestamp)
-    if 0 <= int(user_time.strftime('%H')) < 6:
-        print('User {} post your code at {}'.format(users['username'],
-                                                    user_time.strftime
-                                                    ('%H:%M:%S')))
+    user_time_local = user_time_zone.localize(timestamp)
+    return user_time_local
 
 
 if __name__ == '__main__':
-    for user in load_attempts():
-        get_midnighters(user)
+    for attempt in load_attempts():
+        user_time = get_midnighters(attempt)
+        if 0 <= int(user_time.strftime('%H')) < 6:
+            print('User {} post your code at {}'.format(attempt['username'],
+                                                        user_time.strftime
+                                                        ('%H:%M:%S')))
