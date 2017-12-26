@@ -4,22 +4,22 @@ import datetime
 
 
 def load_attempts():
-    response = requests.get(
-        'http://devman.org/api/challenges/solution_attempts'
-    ).json()
-    pages = response['number_of_pages']
-    for page in range(1, pages+1):
+    url = 'http://devman.org/api/challenges/solution_attempts'
+    page = 1
+    while True:
         response = requests.get(
-            'http://devman.org/api/challenges/'
-            'solution_attempts', params={'page': page}
-        )
-        response_dict = response.json()
-        for record in response_dict['records']:
+            url,
+            params={'page': page}
+        ).json()
+        for record in response['records']:
             yield {
                 'username': record['username'],
                 'timestamp': record['timestamp'],
                 'timezone': record['timezone'],
             }
+        if page == response['number_of_pages']:
+            break
+        page += 1
 
 
 def get_user_local_time(user):
@@ -33,8 +33,10 @@ def get_user_local_time(user):
 
 if __name__ == '__main__':
     for attempt in load_attempts():
+        midnight = 0
+        sunrise = 6
         user_time = get_user_local_time(attempt)
-        if 0 <= int(user_time.strftime('%H')) < 6:
+        if midnight <= int(user_time.strftime('%H')) < sunrise:
             print(
                 'User {} post your code at {}'.format(
                     attempt['username'],
